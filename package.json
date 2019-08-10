@@ -1,23 +1,24 @@
 {
   "name": "react-native-android-location-setting-enabler",
   "title": "React Native Android Location Setting Enabler",
-  "version": "1.0.0",
-  "description": "TODO",
+  "version": "0.0.1",
+  "description": "React Native module for enable android location settings without going to device's setting page",
   "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/github_account/react-native-android-location-setting-enabler.git",
-    "baseUrl": "https://github.com/github_account/react-native-android-location-setting-enabler"
+    "url": "git+https://github.com/reactrondev/react-native-android-location-setting-enabler.git",
+    "baseUrl": "https://github.com/reactrondev/react-native-android-location-setting-enabler"
   },
   "keywords": [
     "react-native"
   ],
   "author": {
-    "name": "Your Name",
-    "email": "yourname@email.com"
+    "name": "Jarvis Luong",
+    "email": "jarvisluong@gmail.com"
   },
   "license": "MIT",
   "licenseFilename": "LICENSE",

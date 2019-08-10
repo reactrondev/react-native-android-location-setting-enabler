@@ -1,5 +1,5 @@
 import { NativeModules } from 'react-native';
 
-const { AndroidLocationSettingEnabler } = NativeModules;
+const { RNAndroidLocationSettingEnablerModule } = NativeModules;
 
-export default AndroidLocationSettingEnabler;
+export default RNAndroidLocationSettingEnablerModule;

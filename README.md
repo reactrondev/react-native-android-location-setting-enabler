@@ -20,14 +20,26 @@
   	```
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
   	```
-      compile project(':react-native-android-location-setting-enabler')
+      implementation project(':react-native-android-location-setting-enabler')
   	```
 
 
 ## Usage
 ```javascript
 import RNAndroidLocationSettingEnabler from 'react-native-android-location-setting-enabler';
+```
 
-// TODO: What to do with the module?
-RNAndroidLocationSettingEnabler;
+### RNAndroidLocationSettingEnabler API.
+| Function | Arguments | Returns | Note |
+|:---|:---:|:---:|:---:|:------|
+| `checkLocationSettingStatus` | `options: LocationSettingRequest` | `Promise<void>` | Check if location setting satisfies the request, the promise resolve if the location setting satisfies, reject otherwise
+| `checkAndEnableLocationSetting` | `options: LocationSettingRequest` | `Promise<void>` | Check if location setting satisfies the request, if not, try to enable location setting.
+
+### Constants
+
+```
+RNAndroidLocationSettingEnabler.PRIORITY_BALANCED_POWER_ACCURACY: number;
+RNAndroidLocationSettingEnabler.PRIORITY_HIGH_ACCURACY: number;
+RNAndroidLocationSettingEnabler.PRIORITY_LOW_POWER: number;
+RNAndroidLocationSettingEnabler.PRIORITY_NO_POWER: number;
 ```

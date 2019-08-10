@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 
 import com.facebook.react.bridge.BaseActivityEventListener;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -23,12 +25,19 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @ReactModule(name = RNAndroidLocationSettingEnablerModule.NAME)
 public class RNAndroidLocationSettingEnablerModule extends ReactContextBaseJavaModule {
     private static final int REQUEST_CHECK_SETTINGS = 1;
 
+    public static final String NAME = "RNAndroidLocationSettingEnablerModule";
+
+    private static final String E_RESOLUTION_REQUIRED = "RESOLUTION_REQUIRED";
     private static final String E_ACTIVITY_DOES_NOT_EXIST = "E_ACTIVITY_DOES_NOT_EXIST";
     private static final String E_SETTINGS_CHANGE_UNAVAILABLE = "E_SETTINGS_CHANGE_UNAVAILABLE";
     private static final String E_USER_CANCELED = "E_USER_CANCELED";
@@ -76,7 +85,7 @@ public class RNAndroidLocationSettingEnablerModule extends ReactContextBaseJavaM
     };
 
     @ReactMethod()
-    public void checkAndEnableGPSAndBLE(Promise promise) {
+    public void checkLocationSettingStatus(final ReadableMap options, final Promise promise) {
         Activity currentActivity = getCurrentActivity();
 
         if (currentActivity == null) {
@@ -84,20 +93,63 @@ public class RNAndroidLocationSettingEnablerModule extends ReactContextBaseJavaM
             return;
         }
 
-        LocationRequest mLocationRequestHighAccuracy = LocationRequest
-                .create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationRequest mLocationRequestBalancedPowerAccuracy = LocationRequest
-                .create()
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequestHighAccuracy)
-                .addLocationRequest(mLocationRequestBalancedPowerAccuracy)
-                .setNeedBle(true);
+        LocationSettingsRequest locationSettingsRequest = createLocationSettingRequest(options);
+
+
         Task<LocationSettingsResponse> task =
                 LocationServices
-                        .getSettingsClient(mContext.getCurrentActivity())
-                        .checkLocationSettings(builder.build());
+                        .getSettingsClient(currentActivity)
+                        .checkLocationSettings(locationSettingsRequest);
+
+        task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+                    promise.resolve(null);
+                } catch (ApiException exception) {
+
+                    switch (exception.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            // Location settings are not satisfied. But could be fixed by showing the
+                            // user a dialog.
+                            promise.reject(E_RESOLUTION_REQUIRED, "Location settings" +
+                                    " are not satisfied. But could be" +
+                                    " fixed by showing the user a dialog.");
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            // Location settings are not satisfied. However, we have no way to fix the
+                            // settings so we won't show the dialog.
+                            promise.reject(
+                                    E_SETTINGS_CHANGE_UNAVAILABLE,
+                                    "Location settings are not satisfied. " +
+                                            "However, we have no way to fix the settings " +
+                                            "so we won't show the dialog.");
+                            break;
+                    }
+                }
+            }
+        });
+
+    }
+
+    @ReactMethod()
+    public void checkAndEnableLocationSetting(final ReadableMap options, final Promise promise) {
+        Activity currentActivity = getCurrentActivity();
+
+        if (currentActivity == null) {
+            promise.reject(E_ACTIVITY_DOES_NOT_EXIST, "Activity doesn't exist");
+            return;
+        }
+
+        LocationSettingsRequest locationSettingsRequest = createLocationSettingRequest(options);
+
+
+        Task<LocationSettingsResponse> task =
+                LocationServices
+                        .getSettingsClient(currentActivity)
+                        .checkLocationSettings(locationSettingsRequest);
         task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
             @Override
             public void onComplete(Task<LocationSettingsResponse> task) {
@@ -142,10 +194,40 @@ public class RNAndroidLocationSettingEnablerModule extends ReactContextBaseJavaM
         });
     }
 
+    private LocationSettingsRequest createLocationSettingRequest(ReadableMap options) {
+        ReadableArray priorities = options.getArray("priorities");
+        boolean needBle = options.getBoolean("needBle");
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+
+        if (priorities != null) {
+            for (int i = 0; i < priorities.size(); i++) {
+                int priority = priorities.getInt(i);
+                LocationRequest locationRequest = LocationRequest
+                        .create()
+                        .setPriority(priority);
+                builder.addLocationRequest(locationRequest);
+            }
+        }
+
+        builder.setNeedBle(needBle);
+        return builder.build();
+    }
+
+    @Nullable
+    @Override
+    public Map<String, Object> getConstants() {
+        Map<String, Object> constants = new HashMap<>();
+        constants.put("PRIORITY_BALANCED_POWER_ACCURACY", LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        constants.put("PRIORITY_HIGH_ACCURACY", LocationRequest.PRIORITY_HIGH_ACCURACY);
+        constants.put("PRIORITY_LOW_POWER", LocationRequest.PRIORITY_LOW_POWER);
+        constants.put("PRIORITY_NO_POWER", LocationRequest.PRIORITY_NO_POWER);
+        return constants;
+    }
+
 
     @Nonnull
     @Override
     public String getName() {
-        return "RNAndroidLocationSettingEnablerModule";
+        return NAME;
     }
 }

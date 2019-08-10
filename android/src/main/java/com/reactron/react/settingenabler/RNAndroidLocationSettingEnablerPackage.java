@@ -15,9 +15,9 @@ public class RNAndroidLocationSettingEnablerPackage implements ReactPackage {
     @Nonnull
     @Override
     public List<NativeModule> createNativeModules(@Nonnull ReactApplicationContext reactContext) {
-        return Arrays.asList(
-                new RNAndroidLocationSettingEnablerModule(reactContext)
-        );
+        List<NativeModule> modules = new ArrayList<>();
+        modules.add(new RNAndroidLocationSettingEnablerModule(reactContext));
+        return modules;
     }
 
     @Nonnull
