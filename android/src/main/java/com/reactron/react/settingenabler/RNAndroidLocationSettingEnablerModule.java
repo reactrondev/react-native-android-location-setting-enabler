@@ -56,7 +56,6 @@ public class RNAndroidLocationSettingEnablerModule extends ReactContextBaseJavaM
 
         @Override
         public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent intent) {
-            final LocationSettingsStates states = LocationSettingsStates.fromIntent(intent);
             if (requestCode == REQUEST_CHECK_SETTINGS && mLocationSettingPromise != null) {
                 switch (resultCode) {
                     case Activity.RESULT_OK:
