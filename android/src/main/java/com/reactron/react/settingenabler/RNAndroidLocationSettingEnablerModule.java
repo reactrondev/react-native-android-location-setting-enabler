@@ -7,6 +7,8 @@ import android.content.IntentSender;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -83,6 +85,16 @@ public class RNAndroidLocationSettingEnablerModule extends ReactContextBaseJavaM
         }
     };
 
+    @ReactMethod()
+    public void isGoogleServiceAvailable(final Promise promise) {
+        int result = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(mContext);
+        if (result == ConnectionResult.SUCCESS) {
+            promise.resolve(true);
+            return;
+        }
+        promise.resolve(false);
+    }
+    
     @ReactMethod()
     public void checkLocationSettingStatus(final ReadableMap options, final Promise promise) {
         Activity currentActivity = getCurrentActivity();
