@@ -1,7 +1,7 @@
 {
   "name": "react-native-android-location-setting-enabler",
   "title": "React Native Android Location Setting Enabler",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "React Native module for enable android location settings without going to device's setting page",
   "main": "index.js",
   "typings": "index.d.ts",
